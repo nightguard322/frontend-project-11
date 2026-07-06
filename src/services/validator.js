@@ -7,8 +7,16 @@ const validate = (fields) => {
     return {}
   }
   catch (e) {
-    return keyBy(e.inner, 'path')
+    if (e.name === 'ValidationError') {
+      return e.inner.map(error => error.message)
+    }
+    throw e
   }
+}
+
+const handleFormData = (data) => {
+  state.form.fields = {...state.form.fields, ...data}
+  state.form.errors = validate(data) //разобраться со срабатываением сохранения и рендера
 }
 
 export { validate }
