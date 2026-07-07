@@ -1,11 +1,13 @@
 import { proxy } from 'valtio/vanilla'
 
 export const state = proxy({
-    form: { 
+    form: {
         fields: {
-            url: {}
+            url: {},
         },
-        errors: {},
+        errors: [],
         isValid: true,
+    },
+    feeds: {
     }
 })

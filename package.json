@@ -16,6 +16,10 @@
     "vite": "^8.1.0"
   },
   "dependencies": {
-    "bootstrap": "^5.3.8"
+    "bootstrap": "^5.3.8",
+    "es-toolkit": "^1.49.0",
+    "i18next": "^26.3.4",
+    "valtio": "^2.3.2",
+    "yup": "^1.7.1"
   }
 }

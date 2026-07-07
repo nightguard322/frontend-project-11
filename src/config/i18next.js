@@ -1,12 +1,17 @@
 export default {
-    rssForm: {
+  en: {
+    translation: {
+      rssForm: {
         errors: {
-            invalid_url: "url invalid",
-            url_required: 'url required',
+          invalid_url: 'url invalid',
+          url_required: 'url required',
+          url_exists: 'RSS is already exists'
         },
         messages: {
-            success: 'RSS success'
-        }
+          success: 'RSS success',
+        },
+      },
     }
+  }
 
 }
