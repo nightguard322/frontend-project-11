@@ -6,9 +6,9 @@ import { uniqueId } from 'es-toolkit/compat'
 const handleFormData = (data) => {
   const fields = Object.fromEntries(data.entries())
   const form = state.form
-  const schema = createSchema(form.feeds)
+  const schema = createSchema(state.feeds)
   validate(schema, fields).then((errors) => {
-    form.fields = { ...state.form.fields, ...fields }
+    form.fields = { ...form.fields, ...fields }
     form.errors = []
     if (errors.length > 0) {
       form.errors = errors
@@ -18,7 +18,7 @@ const handleFormData = (data) => {
       id: uniqueId(),
       url: fields.url
     }
-    form.feeds = {...form.feeds, feed}
+    state.feeds.push(feed)
   })// разобраться со срабатываением сохранения и рендера
 }
 

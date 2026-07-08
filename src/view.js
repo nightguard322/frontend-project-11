@@ -12,8 +12,7 @@ const renderErrors = (errors, messageBox) => {
   errors.forEach((errorKey) => {
     console.log(errorKey, 'errorKey')
     const li = document.createElement('li')
-    console.log('error code', errorKey)
-    li.textContent = i18next.t('rssForm.errors.invalid_url')
+    li.textContent = i18next.t(errorKey)
     errorsList.append(li)
   })
   messageBox.append(errorsList)

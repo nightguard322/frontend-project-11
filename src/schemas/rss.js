@@ -1,16 +1,18 @@
 import * as yup from 'yup'
 
-export const createSchema = (existingData = []) => {
+export const createSchema = (feeds = []) => {
   return yup.object().shape({
   url: yup.string()
     .url('rssForm.errors.invalid_url')
     .required('rssForm.errors.url_required')
     .test(
       'test-is-unique',
-      'url_exists',
+      'rssForm.errors.url_exists',
       function (value) {
         if (!value) return true
-        const feeds = Object.values(existingData)
+        console.log('exists? = ', feeds.some(
+          feed => feed.url.toLowerCase() === value.toLowerCase()
+        ) )
         return !feeds.some(
           feed => feed.url.toLowerCase() === value.toLowerCase()
         )
