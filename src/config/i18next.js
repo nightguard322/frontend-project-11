@@ -1,17 +1,5 @@
-export default {
-  en: {
-    translation: {
-      rssForm: {
-        errors: {
-          invalid_url: 'url invalid',
-          url_required: 'url required',
-          url_exists: 'RSS is already exists'
-        },
-        messages: {
-          success: 'RSS success',
-        },
-      },
-    }
-  }
+import ru from "./translations/ru";
+import en from "./translations/en";
 
-}
+console.log('translations - ', {ru, en})
+export default {ru, en}

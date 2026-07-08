@@ -4,7 +4,7 @@ import resources from './config/i18next.js'
 const i18nextSetUp = () => {
   return i18next.init({
     debug: true,
-    lng: 'en',
+    lng: 'ru',
     resources,
   })
 }

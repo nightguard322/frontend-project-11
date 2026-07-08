@@ -21,7 +21,7 @@ const renderErrors = (errors, messageBox) => {
 const renderSuccess = (messageBox) => {
   messageBox.innerHTML = ''
   messageBox.classList = `${baseClassList} text-success`
-  messageBox.textContent = i18next.t('messages.success')
+  messageBox.textContent = i18next.t('rssForm.messages.success')
 }
 
 export function initView() {
