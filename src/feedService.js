@@ -2,6 +2,15 @@ import { state } from './models/appState.js'
 import { validate } from './services/validator.js'
 import { createSchema } from './schemas/rss.js'
 import { uniqueId } from 'es-toolkit/compat'
+import { PROXY_API_CONFIG } from './config/proxy.js'
+import axios from 'axios'
+
+const fetch = (url) => {
+  const targetUrl = encodeURIComponent(url)
+  const proxyUrl = `${PROXY_API_CONFIG.BASE_PROXY_URL}?url=${targetUrl}`
+  return axios.get(proxyUrl)
+}
+
 
 const handleFormData = (data) => {
   const fields = Object.fromEntries(data.entries())
@@ -14,12 +23,19 @@ const handleFormData = (data) => {
       form.errors = errors
       return
     }
-    const feed = {
+    const feed = { //не полные данные, надо fetch
       id: uniqueId(),
-      url: fields.url
+      url: fields.url,
+      status: 'loading'
     }
-    state.feeds.push(feed)
-  })// разобраться со срабатываением сохранения и рендера
+
+    fetch(feed.url).then(data => {
+      feed.status = 'success'
+      feed = {...feed, ...data}
+      state.feeds.list.push(feed)
+    })
+
+  })
 }
 
 export { handleFormData, validate }

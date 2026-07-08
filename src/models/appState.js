@@ -8,6 +8,7 @@ export const state = proxy({
         errors: [],
         isValid: true,
     },
-    feeds: []
-        //{id: 123, url: http://url.url, ...}
+    feeds: { activeId: null, list: []},//{id: 123, url: http://url.url, status: 'loading'|'success', 'error'}
+    posts: [] //post_id = 123, title = 'test', content = 'test content'
+        
 })
