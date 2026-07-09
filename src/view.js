@@ -2,6 +2,7 @@ import { state } from './models/appState.js'
 import { subscribe, snapshot } from 'valtio/vanilla'
 import { handleFormData } from './feedService.js'
 import i18next from 'i18next'
+import { setActiveFeed } from './models/appState.js'
 
 const baseClassList = 'text-secondary form-message'
 const items = {
@@ -29,13 +30,18 @@ const renderFormSuccess = (messageBox) => {
 }
 
 const renderFeeds = () => {
-  //feeds = [{}, {}
-  const feedsContainer = document.createDocument('ul')
+  feeds.innerHTML = ''
+  
+  const feedsContainer = document.createElement('ul')
   state.feeds.forEach(feed => {
     const feedContainer = document.createElement('li')
 
-    const title = document.createElement('h3')
+    const title = document.createElement('a')
     title.textContent = feed.title
+    title.href = '#'
+    title.addEventListener('click', (e) => {
+      setActiveFeed(e.target.id) //импортирован с модели со state
+    })
 
     const desc = document.createElement('span')
     desc.textContent = feed.description
@@ -43,16 +49,9 @@ const renderFeeds = () => {
     feedContainer.append(title, desc)
     feedsContainer.append(feedContainer)
   })
+  feeds.append(feedsContainer)
 }
 
-// post logic:     const feedContainer = document.createElement('li')
-//     feedContainer.classList = 'd-flex justify-content-between align-items-center mb-3 border-bottom pb-2'
-
-//     const title = document.createElement('a')
-//     title.classList = 'h5 mb-0 me-3'
-//     title.textContent = feed.title
-    
-//     const 
 export function initView() {
   subscribe(state.form, () => {
     const snap = snapshot(state)
