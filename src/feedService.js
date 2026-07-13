@@ -61,7 +61,8 @@ const handleFormData = (data) => {
       }
     })
     .catch(e => {
-      console.log('error', e)
+      currentFeed.status = 'error'
+      console.log(e)
     })
   })
 }

@@ -36,17 +36,25 @@ const renderFeeds = () => {
   state.feeds.list.forEach(feed => {
     const feedContainer = document.createElement('li')
 
-    const title = document.createElement('a')
-    title.textContent = feed.title
-    title.href = '#'
-    title.addEventListener('click', () => {
-      setActiveFeed(feed.id) //импортирован с модели со state
-    })
-
-    const desc = document.createElement('span')
-    desc.textContent = feed.description
-
-    feedContainer.append(title, desc)
+    switch (feed.status) {
+      case 'loading':
+        feedContainer.textContent = 'Загрузка'
+        break
+      case 'success':
+        const title = document.createElement('a')
+        title.textContent = feed.title
+        title.href = '#'
+        title.addEventListener('click', () => {
+          setActiveFeed(feed.id) //импортирован с модели со state
+        })
+        const desc = document.createElement('span')
+        desc.textContent = feed.description
+        feedContainer.append(title, desc)
+        break
+      case 'error':
+        feedContainer.textContent = 'Ошибка'
+        break
+    }
     feedsContainer.append(feedContainer)
   })
   feeds.append(feedsContainer)
@@ -61,14 +69,14 @@ export function initView() {
       renderFormErrors(currentErrors, messageBox)
       return
     }
-    handleFeeds()
-    // renderFormSuccess(messageBox)
-    // renderFeeds()
   })
 }
   subscribe(state.feeds, () => {
     state.feeds.forEach(feed => {
-      
+      switch(feed.status) {
+        case 'success':
+          //renderFeeds()
+      }
     })
   })
 
