@@ -19,4 +19,4 @@ const state = proxy({
         
 })
 
-export { proxy, setActiveFeed }
+export { state, setActiveFeed }

@@ -10,5 +10,9 @@ translation: {
         success: 'RSS успешно загружен',
     },
     },
+    feeds: {
+        defaultTitle: 'Без названия',
+        defaultDesc: 'Без описания'
+    }
 }
 }

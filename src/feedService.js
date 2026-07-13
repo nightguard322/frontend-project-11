@@ -14,12 +14,12 @@ const fetch = (url) => {
     const xmlString = response.data.content
     const parser = new DOMParser()
     const xmlDOM = parser.parseFromString(xmlString, "text/xml")
-    if (xmlDOM.querySelector('parseerror')) {
+    if (xmlDOM.querySelector('parsererror')) {
       throw new Error('Wrong xml doc')
     }
-
-    const title = xmlDOM.querySelector("channel > title")?.textContent || i18next.t('defaultTitle')
-    const items = Array.from(querySelectorAll('item')).map(item => ({
+    console.log('dom from RSS', xmlDOM)
+    const title = xmlDOM.querySelector("channel > title")?.textContent || i18next.t('feeds.defaultTitle')
+    const items = Array.from(xmlDOM.querySelectorAll('item')).map(item => ({
       title: item.querySelector('title')?.textContent,
       link: item.querySelector('link')?.textContent,
       description: item.querySelector('description')?.textContent
@@ -30,9 +30,10 @@ const fetch = (url) => {
 
 
 const handleFormData = (data) => {
-  const fields = Object.fromEntries(data.entries())
+  const fields = Object.fromEntries(data.entries()) //formData с формы, то, что пришло
   const form = state.form
-  const schema = createSchema(state.feeds)
+  const feeds = state.feeds.list
+  const schema = createSchema(feeds)
   validate(schema, fields).then((errors) => {
     form.fields = { ...form.fields, ...fields }
     form.errors = []
@@ -41,24 +42,28 @@ const handleFormData = (data) => {
       return
     }
     const id = uniqueId()
-    state.feeds.push({ //не полные данные, надо fetch
+    feeds.push({ //не полные данные, надо fetch
       id,
       url: fields.url,
       status: 'loading',
       title: "Загрузка"
     })  
-
-    fetch(feed.url).then(({title, items}) => {
-      state.feeds[id].status = 'success'
-      state.feeds[id].title = title
+    const currentFeed = feeds.find(f => f.id === id)
+    fetch(fields.url)
+    .then(({title, items}) => {
+      currentFeed.status = 'success'
+      currentFeed.title = title
 
       state.posts.byFeedId[id] = items
 
-      if (!state.feeds.activeId) {
-        state.feeds.activeId = id
+      if (!feeds.activeId) {
+        currentFeed.status = error
       }
+    })
+    .catch(e => {
+      console.log('error', e)
     })
   })
 }
 
-export { handleFormData, validate, setActiveFeed}
+export { handleFormData, validate}

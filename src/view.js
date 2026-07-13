@@ -33,14 +33,14 @@ const renderFeeds = () => {
   feeds.innerHTML = ''
   
   const feedsContainer = document.createElement('ul')
-  state.feeds.forEach(feed => {
+  state.feeds.list.forEach(feed => {
     const feedContainer = document.createElement('li')
 
     const title = document.createElement('a')
     title.textContent = feed.title
     title.href = '#'
-    title.addEventListener('click', (e) => {
-      setActiveFeed(e.target.id) //импортирован с модели со state
+    title.addEventListener('click', () => {
+      setActiveFeed(feed.id) //импортирован с модели со state
     })
 
     const desc = document.createElement('span')
@@ -61,20 +61,24 @@ export function initView() {
       renderFormErrors(currentErrors, messageBox)
       return
     }
-    renderFormSuccess(messageBox)
-    renderFeeds()
+    handleFeeds()
+    // renderFormSuccess(messageBox)
+    // renderFeeds()
   })
-
+}
   subscribe(state.feeds, () => {
-
+    state.feeds.forEach(feed => {
+      
+    })
   })
 
 
   items.form.addEventListener('submit', (e) => { // просто заполнение состояния
     e.preventDefault()
-    const formData = new FormData(form)
+    const formData = new FormData(e.target)
     handleFormData(formData)
-  })
-
-
-}
+    //валидация формы
+    //валидно - loading (рендер - колесо загрузки), нет - error (рендер - отрисовка сообщения)
+    //серверная валидация (рендер - информация), нет - error (рендер - отрисовка сообщения)
+    //
+})
