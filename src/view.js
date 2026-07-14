@@ -8,7 +8,8 @@ const baseClassList = 'text-secondary form-message'
 const items = {
   form: document.querySelector('#rss-form'),
   feeds: document.querySelector('#feeds'),
-  posts: document.querySelector('#posts')
+  posts: document.querySelector('#posts'),
+  messageBox: document.querySelector('.form-message')
 }
 
 const renderFormErrors = (errors, messageBox) => {
@@ -30,7 +31,7 @@ const renderFormSuccess = (messageBox) => {
 }
 
 const renderFeeds = () => {
-  feeds.innerHTML = ''
+  items.feeds.innerHTML = ''
   
   const feedsContainer = document.createElement('ul')
   state.feeds.list.forEach(feed => {
@@ -47,37 +48,32 @@ const renderFeeds = () => {
         title.addEventListener('click', () => {
           setActiveFeed(feed.id) //импортирован с модели со state
         })
-        const desc = document.createElement('span')
+        const desc = document.createElement('p')
         desc.textContent = feed.description
         feedContainer.append(title, desc)
+        renderFormSuccess(items.messageBox)
         break
       case 'error':
-        feedContainer.textContent = 'Ошибка'
+        feedContainer.textContent = 'Ошибка загрузки'
         break
     }
     feedsContainer.append(feedContainer)
   })
-  feeds.append(feedsContainer)
+  items.feeds.append(feedsContainer)
 }
 
 export function initView() {
   subscribe(state.form, () => {
     const snap = snapshot(state)
     const currentErrors = snap.form.errors
-    const messageBox = document.querySelector('.form-message')
     if (currentErrors.length > 0) {
-      renderFormErrors(currentErrors, messageBox)
+      renderFormErrors(currentErrors, items.messageBox)
       return
     }
   })
 }
   subscribe(state.feeds, () => {
-    state.feeds.forEach(feed => {
-      switch(feed.status) {
-        case 'success':
-          //renderFeeds()
-      }
-    })
+    renderFeeds()
   })
 
 
