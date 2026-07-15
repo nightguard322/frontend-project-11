@@ -15,7 +15,7 @@ const state = proxy({
     feeds: { activeId: null, list: []},//{id: 123, url: http://url.url, status: 'loading'|'success', 'error'}
     posts: {
         byFeedId: {}
-    } //post_id = 123, title = 'test', content = 'test content'
+    } //1: [{ title = 'test', content = 'test content', link = 'url'}, { title = 'test2', content = 'test content2' }]
         
 })
 
