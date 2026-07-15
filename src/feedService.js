@@ -49,16 +49,17 @@ const handleFormData = (data) => {
       title: "Загрузка"
     })  
     const currentFeed = feeds.find(f => f.id === id)
+
     fetch(fields.url)
     .then(({title, description, posts}) => {
       currentFeed.status = 'success'
       currentFeed.title = title
       currentFeed.description = description
-      
+      console.log('id', id, 'fetched posts: ', posts)
       state.posts.byFeedId[id] = posts
 
-      if (!feeds.activeId) {
-        feeds.activeId = id
+      if (!state.feeds.activeId) {
+        state.feeds.activeId = id
       }
     })
     .catch(e => {

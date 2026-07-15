@@ -30,10 +30,16 @@ const renderFormSuccess = (messageBox) => {
   messageBox.textContent = i18next.t('rssForm.messages.success')
 }
 
+const createContainer = () => {
+  const container = document.createElement('ul')
+  container.classList.add('list-unstyled')
+  return container
+}
+
 const renderFeeds = () => {
-  items.feeds.innerHTML = ''
   
-  const feedsContainer = document.createElement('ul')
+  const feedsContainer = createContainer()
+
   state.feeds.list.forEach(feed => {
     const feedContainer = document.createElement('li')
 
@@ -42,16 +48,21 @@ const renderFeeds = () => {
         feedContainer.textContent = 'Загрузка'
         break
       case 'success':
-        const title = document.createElement('a')
+
+        const title = document.createElement('h6')
         title.textContent = feed.title
-        title.href = '#'
-        title.addEventListener('click', () => {
+
+        const desc = document.createElement('span')
+        desc.textContent = feed.description
+
+        feedContainer.classList.add('btn', 'p-0', 'text-start')
+        feedContainer.addEventListener('click', () => {
           setActiveFeed(feed.id) //импортирован с модели со state
         })
-        const desc = document.createElement('p')
-        desc.textContent = feed.description
+
         feedContainer.append(title, desc)
-        renderFormSuccess(items.messageBox)
+        renderPosts()
+        renderFormSuccess(items.messageBox) //???
         break
       case 'error':
         feedContainer.textContent = 'Ошибка загрузки'
@@ -59,7 +70,31 @@ const renderFeeds = () => {
     }
     feedsContainer.append(feedContainer)
   })
-  items.feeds.append(feedsContainer)
+  items.feeds.replaceChildren(feedsContainer)
+}
+
+
+
+const renderPosts = () => {
+  const postsContainer = createContainer()
+
+  const activeFeedId = state.feeds.activeId
+  const posts = state.posts.byFeedId[activeFeedId] //Массив с постами
+
+  posts.forEach(post => {
+    const postContainer = document.createElement('li')
+    postContainer.classList.add('d-flex', 'justify-content-between', 'mb-2')
+    const title = document.createElement('a')
+    title.textContent = post.title
+
+    const button = document.createElement('button')
+    button.classList.add('btn', 'btn-outline-primary')
+    button.textContent = 'Просмотр'
+
+    postContainer.append(title, button)
+    postsContainer.append(postContainer)
+  })
+  items.posts.replaceChildren(postsContainer)
 }
 
 export function initView() {
