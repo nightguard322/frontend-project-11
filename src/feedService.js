@@ -15,13 +15,13 @@ const fetchFeed = (url) => {
 const autoRefreshRss = () => {
   const DELAY = 1000 * 30
 
-  const checkFeeds = (index) => {
+  const checkFeeds = (feedIndex) => {
     const feeds = state.feeds.list
-    if (feeds.length <= index) { //l = 0  i = 0 ! l = 2 i = 0
+    if (feeds.length <= feedIndex) { //l = 0  i = 0 ! l = 2 i = 0
       setTimeout(autoRefreshRss, DELAY)
       return
     }
-    const feed = feeds[index]
+    const feed = feeds[feedIndex]
     fetchFeed(feed.url)
     .then(response => {
       const rssDOM = parseXML(response)
@@ -31,13 +31,13 @@ const autoRefreshRss = () => {
         !posts.some(post => 
           post.link === item.querySelector('link')?.textContent)
         )
-        if (newPosts) {
-          const newPostsData = extractPosts(newPosts)
-          state.posts.byFeedId[feed.id] = [...posts, ...newPostsData];
-        }
+      if (newPosts) {
+        const newPostsData = extractPosts(newPosts)
+        state.posts.byFeedId[feed.id] = [...posts, ...newPostsData];
+      }
     })
     .catch(e => console.log(e))
-    .finally(() => checkFeeds(index + 1))
+    .finally(() => checkFeeds(feedIndex + 1))
     }
 
   checkFeeds(0)
