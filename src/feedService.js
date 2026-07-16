@@ -12,18 +12,35 @@ const fetchFeed = (url) => {
   return axios.get(proxyUrl)
 }
 
-const refreshRss = (url) => {
+const autoRefreshRss = () => {
   const DELAY = 1000 * 30
-  const checkFeeds = () => {
-    
-    fetchFeed(url)
+
+  const checkFeeds = (index) => {
+    const feeds = state.feeds.list
+    if (feeds.length <= index) { //l = 0  i = 0 ! l = 2 i = 0
+      setTimeout(autoRefreshRss, DELAY)
+      return
+    }
+    const feed = feeds[index]
+    fetchFeed(feed.url)
     .then(response => {
-      console.log('new rss feed', response)
+      const rssDOM = parseXML(response)
+      const items = Array.from(rssDOM.querySelectorAll('item'))
+      const posts = state.posts.byFeedId[feed.id] ?? []
+      const newPosts = items.filter(item => 
+        !posts.some(post => 
+          post.link === item.querySelector('link')?.textContent)
+        )
+        if (newPosts) {
+          const newPostsData = extractPosts(newPosts)
+          state.posts.byFeedId[feed.id] = [...posts, ...newPostsData];
+        }
     })
     .catch(e => console.log(e))
-    .finally(() => setTimeout(checkFeeds, DELAY))
-  }
-  checkFeeds()
+    .finally(() => checkFeeds(index + 1))
+    }
+
+  checkFeeds(0)
 }
 
 const parseXML = (response) => {
@@ -36,15 +53,39 @@ const parseXML = (response) => {
   return xmlDOM
 }
 
-const extractData = (xmlDOM) => {
-  const title = xmlDOM.querySelector("channel > title")?.textContent || i18next.t('feeds.defaultTitle')
-  const description = xmlDOM.querySelector("channel > description")?.textContent || i18next.t('feeds.defaultTitle')
-  const posts = Array.from(xmlDOM.querySelectorAll('item')).map(item => ({
+const extractPosts = (postsDOM) => {
+  return Array.from(postsDOM).map(item => ({
     title: item.querySelector('title')?.textContent,
     link: item.querySelector('link')?.textContent,
     description: item.querySelector('description')?.textContent
   }))
-  return {title, description, posts}
+}
+
+const extractData = (xmlDOM) => {
+  const title = xmlDOM.querySelector("channel > title")?.textContent || i18next.t('feeds.defaultTitle')
+  const description = xmlDOM.querySelector("channel > description")?.textContent || i18next.t('feeds.defaultTitle')
+  const postsDOM = xmlDOM.querySelectorAll('item')
+  const postsData = extractPosts(postsDOM)
+  return {title, description, posts: postsData}
+}
+const loadFeedData = (url, currentFeed) => {
+  fetchFeed(url)
+    .then(response => parseXML(response))
+    .then(xml => extractData(xml))
+    .then(({title, description, posts}) => {
+      currentFeed.status = 'success'
+      currentFeed.title = title
+      currentFeed.description = description
+      state.posts.byFeedId[currentFeed.id] = posts
+
+      if (!state.feeds.activeId) {
+        state.feeds.activeId = currentFeed.id
+      }
+    })
+    .catch(e => {
+      currentFeed.status = 'error'
+      console.log(e)
+    })
 }
 
 const handleFormData = (data) => {
@@ -68,24 +109,9 @@ const handleFormData = (data) => {
     })  
     const currentFeed = feeds.find(f => f.id === id)
 
-    fetchFeed(fields.url)
-    .then(response => parseXML(response))
-    .then(xml => extractData(xml))
-    .then(({title, description, posts}) => {
-      currentFeed.status = 'success'
-      currentFeed.title = title
-      currentFeed.description = description
-      state.posts.byFeedId[id] = posts
-
-      if (!state.feeds.activeId) {
-        state.feeds.activeId = id
-      }
-    })
-    .catch(e => {
-      currentFeed.status = 'error'
-      console.log(e)
-    })
+    loadFeedData(fields.url, currentFeed)
   })
 }
 
-export { handleFormData, validate}
+export { handleFormData, validate, autoRefreshRss}
+
