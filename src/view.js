@@ -3,6 +3,8 @@ import { subscribe, snapshot } from 'valtio/vanilla'
 import { handleFormData } from './feedService.js'
 import i18next from 'i18next'
 import { setActiveFeed } from './models/appState.js'
+import 'bootstrap/dist/js/bootstrap.bundle.min.js'
+import * as bootstrap from 'bootstrap';
 
 const baseClassList = 'text-secondary form-message'
 const items = {
@@ -73,19 +75,40 @@ const renderFeeds = () => {
   items.feeds.replaceChildren(feedsContainer)
 }
 
-
-
 const renderPosts = () => {
   const postsContainer = createContainer()
-
   const activeFeedId = state.feeds.activeId
+
+  postsContainer.addEventListener('click', e => {
+    e.preventDefault()
+    const titleLink = e.target.closest('#post-title-link')
+    // titleLink = 
+    const url = titleLink.dataset.url
+    const post = state.posts.byFeedId[activeFeedId].find(p => p.url === url)
+    
+    const modalEl = document.querySelector('.modal');
+    console.log(modalEl)
+    modalEl.querySelector('.modal-title').textContent = post.title;
+    modalEl.querySelector('.modal-body').innerHTML = post.description;
+
+    const modal = new bootstrap.Modal(document.getElementById('previewModal'));
+    modal.show()
+  })
+
+
   const posts = state.posts.byFeedId[activeFeedId] //Массив с постами
 
   posts.forEach(post => {
     const postContainer = document.createElement('li')
+    postContainer.dataset.url = post.url
+    postContainer.datasetBsToggle = "modal"
+    postContainer.datasetBsTarget = "#staticBackdrop"
     postContainer.classList.add('d-flex', 'justify-content-between', 'mb-2')
+
     const title = document.createElement('a')
+    title.id = 'post-title-link'
     title.textContent = post.title
+    title.href = '#'
 
     const button = document.createElement('button')
     button.classList.add('btn', 'btn-outline-primary')
