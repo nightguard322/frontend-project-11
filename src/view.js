@@ -82,25 +82,22 @@ const renderPosts = () => {
   postsContainer.addEventListener('click', e => {
     e.preventDefault()
     const titleLink = e.target.closest('#post-title-link')
-    // titleLink = 
     const url = titleLink.dataset.url
-    const post = state.posts.byFeedId[activeFeedId].find(p => p.url === url)
-    
+    const post = state.posts.byFeedId[activeFeedId].find(p => p.link === url)
+    titleLink.classList = 'abc'
+
     const modalEl = document.querySelector('.modal');
-    console.log(modalEl)
     modalEl.querySelector('.modal-title').textContent = post.title;
     modalEl.querySelector('.modal-body').innerHTML = post.description;
 
-    const modal = new bootstrap.Modal(document.getElementById('previewModal'));
+    const modal = new bootstrap.Modal(document.querySelector('.modal'));
     modal.show()
   })
 
-
-  const posts = state.posts.byFeedId[activeFeedId] //Массив с постами
+  const posts = state.posts.byFeedId[activeFeedId] //Массив с постами 
 
   posts.forEach(post => {
     const postContainer = document.createElement('li')
-    postContainer.dataset.url = post.url
     postContainer.datasetBsToggle = "modal"
     postContainer.datasetBsTarget = "#staticBackdrop"
     postContainer.classList.add('d-flex', 'justify-content-between', 'mb-2')
@@ -109,6 +106,9 @@ const renderPosts = () => {
     title.id = 'post-title-link'
     title.textContent = post.title
     title.href = '#'
+    title.dataset.url = post.link
+    console.log('readed?', post.isRead)
+    title.classList = post.isRead ? 'fw-normal' : 'fw-bold'
 
     const button = document.createElement('button')
     button.classList.add('btn', 'btn-outline-primary')

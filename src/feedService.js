@@ -32,7 +32,7 @@ const autoRefreshRss = () => {
           post.link === item.querySelector('link')?.textContent)
         )
       if (newPosts) {
-        const newPostsData = extractPosts(newPosts)
+        const newPostsData = getPosts(newPosts)
         state.posts.byFeedId[feed.id] = [...posts, ...newPostsData];
       }
     })
@@ -53,11 +53,12 @@ const parseXML = (response) => {
   return xmlDOM
 }
 
-const extractPosts = (postsDOM) => {
+const getPosts = (postsDOM) => {
   return Array.from(postsDOM).map(item => ({
     title: item.querySelector('title')?.textContent,
     link: item.querySelector('link')?.textContent,
-    description: item.querySelector('description')?.textContent
+    description: item.querySelector('description')?.textContent,
+    isRead: false
   }))
 }
 
@@ -65,7 +66,7 @@ const extractData = (xmlDOM) => {
   const title = xmlDOM.querySelector("channel > title")?.textContent || i18next.t('feeds.defaultTitle')
   const description = xmlDOM.querySelector("channel > description")?.textContent || i18next.t('feeds.defaultTitle')
   const postsDOM = xmlDOM.querySelectorAll('item')
-  const postsData = extractPosts(postsDOM)
+  const postsData = getPosts(postsDOM)
   return {title, description, posts: postsData}
 }
 const loadFeedData = (url, currentFeed) => {
@@ -105,7 +106,7 @@ const handleFormData = (data) => {
       id,
       url: fields.url,
       status: 'loading',
-      title: "Загрузка"
+      title: "Загрузка",
     })  
     const currentFeed = feeds.find(f => f.id === id)
 
