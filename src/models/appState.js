@@ -4,19 +4,21 @@ const setActiveFeed = (id) => {
   state.feeds.activeId = id
 }
 
-const state = proxy({
-    form: {
-        fields: {
-            url: {},
-        },
-        errors: [],
-        isValid: true,
-    },
-    feeds: { activeId: null, list: []},//{id: 123, url: http://url.url, status: 'loading'|'success', 'error'}
-    posts: {
-        byFeedId: {}
-    } //1: [{ title = 'test', content = 'test content', link = 'url'}, { title = 'test2', content = 'test content2' }]
-        
-})
+const setIsRead = (post) => {
+    post.isRead = true
+}
 
-export { state, setActiveFeed }
+const createAppState = () => {
+    return proxy({
+        form: {
+            fields: { url: {} },
+            errors: [],
+            isValid: true,
+        },
+        feeds: { activeId: null, list: [] },
+        posts: { byFeedId: {} }
+    });
+}
+
+
+export { createAppState, setActiveFeed, setIsRead }

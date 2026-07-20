@@ -31,7 +31,9 @@ const autoRefreshRss = () => {
         !posts.some(post => 
           post.link === item.querySelector('link')?.textContent)
         )
-      if (newPosts) {
+      if (newPosts.length > 0) {
+        console.log('We are fetching new posts with renew process')
+        console.log('new posts: ', newPosts)
         const newPostsData = getPosts(newPosts)
         state.posts.byFeedId[feed.id] = [...posts, ...newPostsData];
       }
@@ -66,6 +68,7 @@ const extractData = (xmlDOM) => {
   const title = xmlDOM.querySelector("channel > title")?.textContent || i18next.t('feeds.defaultTitle')
   const description = xmlDOM.querySelector("channel > description")?.textContent || i18next.t('feeds.defaultTitle')
   const postsDOM = xmlDOM.querySelectorAll('item')
+  console.log('We are fetching posts from new feed')
   const postsData = getPosts(postsDOM)
   return {title, description, posts: postsData}
 }

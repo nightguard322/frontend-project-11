@@ -1,8 +1,7 @@
-import { state } from './models/appState.js'
+import { setIsRead, setActiveFeed, state } from './models/appState.js'
 import { subscribe, snapshot } from 'valtio/vanilla'
 import { handleFormData } from './feedService.js'
 import i18next from 'i18next'
-import { setActiveFeed } from './models/appState.js'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js'
 import * as bootstrap from 'bootstrap';
 
@@ -84,7 +83,8 @@ const renderPosts = () => {
     const titleLink = e.target.closest('#post-title-link')
     const url = titleLink.dataset.url
     const post = state.posts.byFeedId[activeFeedId].find(p => p.link === url)
-    titleLink.classList = 'abc'
+    setIsRead(post)
+    titleLink.classList = 'fw-normal'
 
     const modalEl = document.querySelector('.modal');
     modalEl.querySelector('.modal-title').textContent = post.title;
@@ -107,7 +107,6 @@ const renderPosts = () => {
     title.textContent = post.title
     title.href = '#'
     title.dataset.url = post.link
-    console.log('readed?', post.isRead)
     title.classList = post.isRead ? 'fw-normal' : 'fw-bold'
 
     const button = document.createElement('button')
