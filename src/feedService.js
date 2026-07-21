@@ -1,4 +1,3 @@
-import { state } from './models/appState.js'
 import { validate } from './services/validator.js'
 import { createSchema } from './schemas/rss.js'
 import { uniqueId } from 'es-toolkit/compat'
@@ -9,13 +8,14 @@ import i18next from 'i18next'
 const fetchFeed = (url) => {
   const targetUrl = encodeURIComponent(url)
   const proxyUrl = `${PROXY_API_CONFIG.BASE_PROXY_URL}${targetUrl}`
-  return axios.get(proxyUrl)
+  return axios.get(proxyUrl) //промис
 }
 
-const autoRefreshRss = () => {
+const autoRefreshRss = (state) => {
   const DELAY = 1000 * 30
-
+  console.log(state, 'feeds in refresh')
   const checkFeeds = (feedIndex) => {
+    
     const feeds = state.feeds.list
     if (feeds.length <= feedIndex) { //l = 0  i = 0 ! l = 2 i = 0
       setTimeout(autoRefreshRss, DELAY)
@@ -32,8 +32,6 @@ const autoRefreshRss = () => {
           post.link === item.querySelector('link')?.textContent)
         )
       if (newPosts.length > 0) {
-        console.log('We are fetching new posts with renew process')
-        console.log('new posts: ', newPosts)
         const newPostsData = getPosts(newPosts)
         state.posts.byFeedId[feed.id] = [...posts, ...newPostsData];
       }
@@ -50,7 +48,7 @@ const parseXML = (response) => {
   const parser = new DOMParser()
   const xmlDOM = parser.parseFromString(xmlString, "text/xml")
   if (xmlDOM.querySelector('parsererror')) {
-    throw new Error('Wrong xml doc in')
+    throw new Error('rssForm.errors.no_rss')
   }
   return xmlDOM
 }
@@ -68,11 +66,11 @@ const extractData = (xmlDOM) => {
   const title = xmlDOM.querySelector("channel > title")?.textContent || i18next.t('feeds.defaultTitle')
   const description = xmlDOM.querySelector("channel > description")?.textContent || i18next.t('feeds.defaultTitle')
   const postsDOM = xmlDOM.querySelectorAll('item')
-  console.log('We are fetching posts from new feed')
   const postsData = getPosts(postsDOM)
   return {title, description, posts: postsData}
 }
-const loadFeedData = (url, currentFeed) => {
+
+const loadFeedData = (url, currentFeed, state) => {
   fetchFeed(url)
     .then(response => parseXML(response))
     .then(xml => extractData(xml))
@@ -81,39 +79,46 @@ const loadFeedData = (url, currentFeed) => {
       currentFeed.title = title
       currentFeed.description = description
       state.posts.byFeedId[currentFeed.id] = posts
-
       if (!state.feeds.activeId) {
         state.feeds.activeId = currentFeed.id
       }
     })
     .catch(e => {
-      currentFeed.status = 'error'
-      console.log(e)
+      if (axios.isAxiosError(e)) {
+        state.form.errors.push('rssForm.errors.network_error')
+      }
+      console.log(state, 'состояние в поле с ошибками')
+      state.form.errors.push(e.message)
     })
 }
 
-const handleFormData = (data) => {
+const handleFormData = (data, state) => {
   const fields = Object.fromEntries(data.entries()) //formData с формы, то, что пришло
   const form = state.form
   const feeds = state.feeds.list
   const schema = createSchema(feeds)
-  validate(schema, fields).then((errors) => {
+  validate(schema, fields)
+  .then((errors) => {
     form.fields = { ...form.fields, ...fields }
     form.errors = []
+    console.log('колво ошибок', errors.length )
     if (errors.length > 0) {
+      console.log('есть ошибки')
       form.errors = errors
       return
     }
     const id = uniqueId()
-    feeds.push({ //не полные данные, надо fetch
+    feeds.push({
       id,
       url: fields.url,
       status: 'loading',
       title: "Загрузка",
     })  
     const currentFeed = feeds.find(f => f.id === id)
+    loadFeedData(fields.url, currentFeed, state)
+  })
+  .catch(e => {
 
-    loadFeedData(fields.url, currentFeed)
   })
 }
 

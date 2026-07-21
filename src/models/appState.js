@@ -1,7 +1,12 @@
 import { proxy } from 'valtio/vanilla'
 
-const setActiveFeed = (id) => {
-  state.feeds.activeId = id
+const setActiveFeed = (feeds, id) => {
+  feeds.activeId = id
+}
+
+const getActiveFeed = (feeds) => {
+    console.log('Мы внутри функции получения активного фида', feeds)
+  return feeds.activeId
 }
 
 const setIsRead = (post) => {
@@ -21,4 +26,4 @@ const createAppState = () => {
 }
 
 
-export { createAppState, setActiveFeed, setIsRead }
+export { createAppState, setActiveFeed, setIsRead, getActiveFeed }

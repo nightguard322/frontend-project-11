@@ -1,4 +1,4 @@
-import { setIsRead, setActiveFeed, state } from './models/appState.js'
+import { setIsRead, setActiveFeed, getActiveFeed} from './models/appState.js'
 import { subscribe, snapshot } from 'valtio/vanilla'
 import { handleFormData } from './feedService.js'
 import i18next from 'i18next'
@@ -37,10 +37,64 @@ const createContainer = () => {
   return container
 }
 
-const renderFeeds = () => {
-  
-  const feedsContainer = createContainer()
+const renderActivePosts = (state) => {
+  console.log('Выполняется рендер постов')
+  const activeFeed = getActiveFeed(state.feeds)
+  if (!activeFeed) return
+  console.log(activeFeed, 'active feed')
+  const activeFeedPosts = state.posts.byFeedId[activeFeed]
 
+  renderPosts(activeFeedPosts)
+  renderFormSuccess(items.messageBox) //???
+}
+
+const addModalWindow = (post) => {
+    const modalEl = document.querySelector('.modal');
+    modalEl.querySelector('.modal-title').textContent = post.title;
+    modalEl.querySelector('.modal-body').innerHTML = post.description;
+    const modal = new bootstrap.Modal(document.querySelector('.modal'));
+    modal.show()
+}
+
+const renderPosts = (posts) => {
+  const postsContainer = createContainer()
+  postsContainer.addEventListener('click', e => {
+    e.preventDefault()
+    const link = e.target.closest('#post-title-link')
+    const url = link.dataset.url
+    const post = posts.find(p => p.link === url)
+    setIsRead(post)
+
+    const titleLink = link.querySelector('a')
+    titleLink.classList = 'fw-normal'
+    addModalWindow(post)
+  })
+
+  posts.forEach(post => {
+    const postContainer = document.createElement('li')
+    postContainer.dataset.url = post.link
+    postContainer.id = 'post-title-link'
+
+    postContainer.datasetBsToggle = "modal"
+    postContainer.datasetBsTarget = "#staticBackdrop"
+    postContainer.classList.add('d-flex', 'justify-content-between', 'mb-2')
+
+    const title = document.createElement('a')
+    title.textContent = post.title
+    title.href = '#'
+    title.classList = post.isRead ? 'fw-normal' : 'fw-bold'
+
+    const button = document.createElement('button')
+    button.classList.add('btn', 'btn-outline-primary')
+    button.textContent = 'Просмотр'
+
+    postContainer.append(title, button)
+    postsContainer.append(postContainer)
+  })
+  items.posts.replaceChildren(postsContainer)
+}
+const renderFeeds = (state) => {
+  const feedsContainer = createContainer()
   state.feeds.list.forEach(feed => {
     const feedContainer = document.createElement('li')
 
@@ -58,12 +112,10 @@ const renderFeeds = () => {
 
         feedContainer.classList.add('btn', 'p-0', 'text-start')
         feedContainer.addEventListener('click', () => {
-          setActiveFeed(feed.id) //импортирован с модели со state
+          console.log('click на фид')
+          setActiveFeed(state.feeds, feed.id)
         })
-
         feedContainer.append(title, desc)
-        renderPosts()
-        renderFormSuccess(items.messageBox) //???
         break
       case 'error':
         feedContainer.textContent = 'Ошибка загрузки'
@@ -74,52 +126,7 @@ const renderFeeds = () => {
   items.feeds.replaceChildren(feedsContainer)
 }
 
-const renderPosts = () => {
-  const postsContainer = createContainer()
-  const activeFeedId = state.feeds.activeId
-
-  postsContainer.addEventListener('click', e => {
-    e.preventDefault()
-    const titleLink = e.target.closest('#post-title-link')
-    const url = titleLink.dataset.url
-    const post = state.posts.byFeedId[activeFeedId].find(p => p.link === url)
-    setIsRead(post)
-    titleLink.classList = 'fw-normal'
-
-    const modalEl = document.querySelector('.modal');
-    modalEl.querySelector('.modal-title').textContent = post.title;
-    modalEl.querySelector('.modal-body').innerHTML = post.description;
-
-    const modal = new bootstrap.Modal(document.querySelector('.modal'));
-    modal.show()
-  })
-
-  const posts = state.posts.byFeedId[activeFeedId] //Массив с постами 
-
-  posts.forEach(post => {
-    const postContainer = document.createElement('li')
-    postContainer.datasetBsToggle = "modal"
-    postContainer.datasetBsTarget = "#staticBackdrop"
-    postContainer.classList.add('d-flex', 'justify-content-between', 'mb-2')
-
-    const title = document.createElement('a')
-    title.id = 'post-title-link'
-    title.textContent = post.title
-    title.href = '#'
-    title.dataset.url = post.link
-    title.classList = post.isRead ? 'fw-normal' : 'fw-bold'
-
-    const button = document.createElement('button')
-    button.classList.add('btn', 'btn-outline-primary')
-    button.textContent = 'Просмотр'
-
-    postContainer.append(title, button)
-    postsContainer.append(postContainer)
-  })
-  items.posts.replaceChildren(postsContainer)
-}
-
-export function initView() {
+export function initView(state) {
   subscribe(state.form, () => {
     const snap = snapshot(state)
     const currentErrors = snap.form.errors
@@ -128,18 +135,19 @@ export function initView() {
       return
     }
   })
-}
+
   subscribe(state.feeds, () => {
-    renderFeeds()
+    renderFeeds(state)
+    renderActivePosts(state)
   })
 
+  // subscribe(state.posts, () => {
+    
+  // })
 
-  items.form.addEventListener('submit', (e) => { // просто заполнение состояния
+  items.form.addEventListener('submit', (e) => {
     e.preventDefault()
     const formData = new FormData(e.target)
-    handleFormData(formData)
-    //валидация формы
-    //валидно - loading (рендер - колесо загрузки), нет - error (рендер - отрисовка сообщения)
-    //серверная валидация (рендер - информация), нет - error (рендер - отрисовка сообщения)
-    //
-})
+    handleFormData(formData, state)
+  })
+}
