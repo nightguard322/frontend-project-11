@@ -9,40 +9,40 @@
   <body>
     <header class="d-flex flex-column align-items-center justify-content-center py-5 bg-dark">
       <div class="text-white">
-        <div class="fs-1">RSS агрегатор</div>
-        <p>Начните читать RSS сегодня! Это легко, это красиво.</p>
+        <div class="fs-1" data-i18next="mainForm.title"></div>
+        <p data-i18next="mainForm.message"></p>
           <form class="d-flex" id="rss-form" role="search">
             <input class="form-control me-2" type="search" placeholder="Ссылка RSS" aria-label="Search" name="url"/>
-            <button class="btn btn-light bg-primary-subtle" type="submit">Добавить</button>
+            <button class="btn btn-light bg-primary-subtle" type="submit" data-i18next="mainForm.addButton"></button>
           </form>
-          <p class="text-secondary form-message">Пример: https://lorem-rss.hexlet.app/feed</p>
+          <p class="text-secondary form-message" data-i18next="mainForm.example"></p>
       </div>
     </header>
     <div class="container mt-5">
       <div class="row">
         <div class="col col-7">
-          <h5>Посты</h5>
+          <h5 data-i18next="posts.title">Посты</h5>
           <div  id="posts"></div>
           <div class="modal" tabindex="-1">
             <div class="modal-dialog">
               <div class="modal-content">
                 <div class="modal-header">
-                  <h5 class="modal-title">Modal title</h5>
+                  <h5 class="modal-title"></h5>
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                  <p>Modal body text goes here.</p>
+                  <p></p>
                 </div>
                 <div class="modal-footer">
-                  <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Читать полностью</button>
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                  <button type="button" class="btn btn-primary" data-bs-dismiss="modal" data-i18next="modal.readMore">Читать полностью</button>
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18next="modal.close">Закрыть</button>
                 </div>
               </div>
             </div>
           </div>
         </div>
         <div class="col col-5" >
-          <h5>Фиды</h5>
+          <h5 data-i18next="feeds.title">Фиды</h5>
           <div id="feeds"></div>
         </div>
       </div>

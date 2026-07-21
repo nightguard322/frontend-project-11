@@ -70,26 +70,17 @@ const extractData = (xmlDOM) => {
   return {title, description, posts: postsData}
 }
 
-const loadFeedData = (url, currentFeed, state) => {
-  fetchFeed(url)
-    .then(response => parseXML(response))
-    .then(xml => extractData(xml))
-    .then(({title, description, posts}) => {
-      currentFeed.status = 'success'
-      currentFeed.title = title
-      currentFeed.description = description
-      state.posts.byFeedId[currentFeed.id] = posts
-      if (!state.feeds.activeId) {
-        state.feeds.activeId = currentFeed.id
-      }
-    })
-    .catch(e => {
-      if (axios.isAxiosError(e)) {
-        state.form.errors.push('rssForm.errors.network_error')
-      }
-      console.log(state, 'состояние в поле с ошибками')
-      state.form.errors.push(e.message)
-    })
+const loadFeedData = (url, errorsList) => {
+  return fetchFeed(url)
+  .then(response => parseXML(response))
+  .then(xml => extractData(xml))
+  .catch(e => {
+    if (axios.isAxiosError(e)) {
+      console.log('ошибка axios')
+      errorsList.push('rssForm.errors.network_error')
+    }
+    errorsList.push(e.message)
+  })
 }
 
 const handleFormData = (data, state) => {
@@ -97,28 +88,40 @@ const handleFormData = (data, state) => {
   const form = state.form
   const feeds = state.feeds.list
   const schema = createSchema(feeds)
+
   validate(schema, fields)
   .then((errors) => {
-    form.fields = { ...form.fields, ...fields }
-    form.errors = []
-    console.log('колво ошибок', errors.length )
+
     if (errors.length > 0) {
-      console.log('есть ошибки')
+      console.log('errors exists!')
       form.errors = errors
       return
     }
+
+    form.fields = { ...form.fields, ...fields }
+    form.errors = []
+    return loadFeedData(fields.url, state.form.errors)
+  })
+  .then((feedData) => {
+    if (!feedData) return
+
+    const { title, description, posts } = feedData
     const id = uniqueId()
     feeds.push({
       id,
       url: fields.url,
-      status: 'loading',
-      title: "Загрузка",
-    })  
-    const currentFeed = feeds.find(f => f.id === id)
-    loadFeedData(fields.url, currentFeed, state)
+      status: 'success',
+      title,
+      description
+    })
+    state.posts.byFeedId[id] = posts
+
+    if (!state.feeds.activeId) {
+      state.feeds.activeId = id
+    }
   })
   .catch(e => {
-
+    form.errors.push(e)
   })
 }
 
