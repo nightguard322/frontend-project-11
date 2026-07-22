@@ -13,6 +13,15 @@ const items = {
   messageBox: document.querySelector('.form-message'),
 }
 
+const renderForm = (state, form) => {
+  const submitButton = form.querySelector('button')
+  const input = form.querySelector('input')
+
+  const isDisabled = form.status === 'sending' || form.status === 'validating'
+  submitButton.disabled = isDisabled
+  input.disabled = isDisabled
+}
+
 const renderFormErrors = (errors, messageBox) => {
   messageBox.innerHTML = ''
   messageBox.classList = `${baseClassList} text-danger`
@@ -38,7 +47,6 @@ const createContainer = () => {
 }
 
 const renderActivePosts = (state) => {
-  console.log('Выполняется рендер постов')
   const activeFeed = getActiveFeed(state.feeds)
   if (!activeFeed) return
   console.log(activeFeed, 'active feed')
@@ -98,44 +106,34 @@ const renderFeeds = (state) => {
   state.feeds.list.forEach((feed) => {
     const feedContainer = document.createElement('li')
 
-    switch (feed.status) {
-      case 'loading': {
-        feedContainer.textContent = 'Загрузка'
-        break
-      }
-      case 'success': {
-        const title = document.createElement('h6')
-        title.textContent = feed.title
+    const title = document.createElement('h6')
+    title.textContent = feed.title
 
-        const desc = document.createElement('span')
-        desc.textContent = feed.description
+    const desc = document.createElement('span')
+    desc.textContent = feed.description
 
-        feedContainer.classList.add('btn', 'p-0', 'text-start')
-        feedContainer.addEventListener('click', () => {
-          console.log('click на фид')
-          setActiveFeed(state.feeds, feed.id)
-        })
-        feedContainer.append(title, desc)
-        break
-      }
-      case 'error': {
-        feedContainer.textContent = 'Ошибка загрузки'
-        break
-      }
-    }
-    feedsContainer.append(feedContainer)
+    feedContainer.classList.add('btn', 'p-0', 'text-start')
+    feedContainer.addEventListener('click', () => {
+      setActiveFeed(state.feeds, feed.id)
+    })
+    feedContainer.append(title, desc)
+
+  feedsContainer.append(feedContainer)
   })
   items.feeds.replaceChildren(feedsContainer)
 }
 
 export function initView(state) {
   subscribe(state.form, () => {
-    const snap = snapshot(state)
-    const currentErrors = snap.form.errors
+    const snapState = snapshot(state)
+    renderForm(snapState, items.form)
+    const currentErrors = snapState.form.errors
     if (currentErrors.length > 0) {
+      state.form.status = 'error'
       renderFormErrors(currentErrors, items.messageBox)
       return
     }
+    state.form.status = 'sending'
   })
 
   subscribe(state.feeds, () => {
@@ -143,12 +141,10 @@ export function initView(state) {
     renderActivePosts(state)
   })
 
-  // subscribe(state.posts, () => {
-
-  // })
 
   items.form.addEventListener('submit', (e) => {
     e.preventDefault()
+    state.form.status = 'validating'
     const formData = new FormData(e.target)
     handleFormData(formData, state)
   })

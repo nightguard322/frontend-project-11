@@ -4,6 +4,7 @@ import { uniqueId } from 'es-toolkit/compat'
 import { PROXY_API_CONFIG } from './config/proxy.js'
 import axios from 'axios'
 import i18next from 'i18next'
+import { setActiveFeed } from './models/appState.js'
 
 const fetchFeed = (url) => {
   const targetUrl = encodeURIComponent(url)
@@ -13,7 +14,6 @@ const fetchFeed = (url) => {
 
 const autoRefreshRss = (state) => {
   const DELAY = 1000 * 30
-  console.log('start autorefresh')
   const checkFeeds = (feedIndex) => {
     const feeds = state.feeds.list
     if (feeds.length <= feedIndex) {
@@ -75,7 +75,6 @@ const loadFeedData = (url, errorsList) => {
     .then(xml => extractData(xml))
     .catch((e) => {
       if (axios.isAxiosError(e)) {
-        console.log('ошибка axios')
         errorsList.push('rssForm.errors.network_error')
       }
       errorsList.push(e.message)
@@ -91,7 +90,6 @@ const handleFormData = (data, state) => {
   validate(schema, fields)
     .then((errors) => {
       if (errors.length > 0) {
-        console.log('errors exists!')
         form.errors = errors
         return
       }
@@ -115,7 +113,7 @@ const handleFormData = (data, state) => {
       state.posts.byFeedId[id] = posts
 
       if (!state.feeds.activeId) {
-        state.feeds.activeId = id
+        setActiveFeed(state.feeds, id)
       }
     })
     .catch((e) => {

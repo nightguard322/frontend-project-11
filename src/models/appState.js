@@ -19,6 +19,7 @@ const createAppState = () => {
       fields: { url: {} },
       errors: [],
       isValid: true,
+      status: 'idle'
     },
     feeds: { activeId: null, list: [] },
     posts: { byFeedId: {} },
