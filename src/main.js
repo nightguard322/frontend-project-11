@@ -8,5 +8,5 @@ import { createAppState } from './models/appState'
 i18nextSetUp().then(() => {
   const appState = createAppState()
   initView(appState)
-  // autoRefreshRss(appState)
+  autoRefreshRss(appState)
 })

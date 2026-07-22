@@ -150,4 +150,10 @@ export function initView(state) {
     const formData = new FormData(e.target)
     handleFormData(formData, state)
   })
+
+  const translations = document.querySelectorAll('[data-i18next]')
+  translations.forEach(item => {
+    const key = item.dataset.i18next
+    item.textContent = i18next.t(key)
+  })
 }

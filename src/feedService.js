@@ -13,12 +13,11 @@ const fetchFeed = (url) => {
 
 const autoRefreshRss = (state) => {
   const DELAY = 1000 * 30
-  console.log(state, 'feeds in refresh')
+  console.log('start autorefresh')
   const checkFeeds = (feedIndex) => {
-    
     const feeds = state.feeds.list
-    if (feeds.length <= feedIndex) { //l = 0  i = 0 ! l = 2 i = 0
-      setTimeout(autoRefreshRss, DELAY)
+    if (feeds.length <= feedIndex) {
+      setTimeout(() => autoRefreshRss(state), DELAY)
       return
     }
     const feed = feeds[feedIndex]
