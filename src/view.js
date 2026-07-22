@@ -1,16 +1,16 @@
-import { setIsRead, setActiveFeed, getActiveFeed} from './models/appState.js'
+import { setIsRead, setActiveFeed, getActiveFeed } from './models/appState.js'
 import { subscribe, snapshot } from 'valtio/vanilla'
 import { handleFormData } from './feedService.js'
 import i18next from 'i18next'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js'
-import * as bootstrap from 'bootstrap';
+import * as bootstrap from 'bootstrap'
 
 const baseClassList = 'text-secondary form-message'
 const items = {
   form: document.querySelector('#rss-form'),
   feeds: document.querySelector('#feeds'),
   posts: document.querySelector('#posts'),
-  messageBox: document.querySelector('.form-message')
+  messageBox: document.querySelector('.form-message'),
 }
 
 const renderFormErrors = (errors, messageBox) => {
@@ -45,20 +45,20 @@ const renderActivePosts = (state) => {
   const activeFeedPosts = state.posts.byFeedId[activeFeed]
 
   renderPosts(activeFeedPosts)
-  renderFormSuccess(items.messageBox) //???
+  renderFormSuccess(items.messageBox) // ???
 }
 
 const addModalWindow = (post) => {
-    const modalEl = document.querySelector('.modal');
-    modalEl.querySelector('.modal-title').textContent = post.title;
-    modalEl.querySelector('.modal-body').innerHTML = post.description;
-    const modal = new bootstrap.Modal(document.querySelector('.modal'));
-    modal.show()
+  const modalEl = document.querySelector('.modal')
+  modalEl.querySelector('.modal-title').textContent = post.title
+  modalEl.querySelector('.modal-body').innerHTML = post.description
+  const modal = new bootstrap.Modal(document.querySelector('.modal'))
+  modal.show()
 }
 
 const renderPosts = (posts) => {
   const postsContainer = createContainer()
-  postsContainer.addEventListener('click', e => {
+  postsContainer.addEventListener('click', (e) => {
     e.preventDefault()
     const link = e.target.closest('#post-title-link')
     const url = link.dataset.url
@@ -70,13 +70,13 @@ const renderPosts = (posts) => {
     addModalWindow(post)
   })
 
-  posts.forEach(post => {
+  posts.forEach((post) => {
     const postContainer = document.createElement('li')
     postContainer.dataset.url = post.link
     postContainer.id = 'post-title-link'
 
-    postContainer.datasetBsToggle = "modal"
-    postContainer.datasetBsTarget = "#staticBackdrop"
+    postContainer.datasetBsToggle = 'modal'
+    postContainer.datasetBsTarget = '#staticBackdrop'
     postContainer.classList.add('d-flex', 'justify-content-between', 'mb-2')
 
     const title = document.createElement('a')
@@ -95,15 +95,15 @@ const renderPosts = (posts) => {
 }
 const renderFeeds = (state) => {
   const feedsContainer = createContainer()
-  state.feeds.list.forEach(feed => {
+  state.feeds.list.forEach((feed) => {
     const feedContainer = document.createElement('li')
 
     switch (feed.status) {
-      case 'loading':
+      case 'loading': {
         feedContainer.textContent = 'Загрузка'
         break
-      case 'success':
-
+      }
+      case 'success': {
         const title = document.createElement('h6')
         title.textContent = feed.title
 
@@ -117,9 +117,11 @@ const renderFeeds = (state) => {
         })
         feedContainer.append(title, desc)
         break
-      case 'error':
+      }
+      case 'error': {
         feedContainer.textContent = 'Ошибка загрузки'
         break
+      }
     }
     feedsContainer.append(feedContainer)
   })
@@ -142,7 +144,7 @@ export function initView(state) {
   })
 
   // subscribe(state.posts, () => {
-    
+
   // })
 
   items.form.addEventListener('submit', (e) => {
@@ -152,7 +154,7 @@ export function initView(state) {
   })
 
   const translations = document.querySelectorAll('[data-i18next]')
-  translations.forEach(item => {
+  translations.forEach((item) => {
     const key = item.dataset.i18next
     item.textContent = i18next.t(key)
   })
