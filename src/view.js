@@ -112,7 +112,7 @@ const renderFeeds = (state) => {
     const desc = document.createElement('span')
     desc.textContent = feed.description
 
-    feedContainer.classList.add('btn', 'p-0', 'text-start')
+    feedContainer.classList.add('btn', 'p-0','text-start')
     feedContainer.addEventListener('click', () => {
       setActiveFeed(state.feeds, feed.id)
     })
