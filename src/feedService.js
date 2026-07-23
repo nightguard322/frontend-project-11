@@ -9,7 +9,7 @@ import { setActiveFeed } from './models/appState.js'
 const fetchFeed = (url) => {
   const targetUrl = encodeURIComponent(url)
   const proxyUrl = `${PROXY_API_CONFIG.BASE_PROXY_URL}${targetUrl}`
-  return axios.get(proxyUrl) // промис
+  return axios.get(targetUrl) // промис
 }
 
 const autoRefreshRss = (state) => {
